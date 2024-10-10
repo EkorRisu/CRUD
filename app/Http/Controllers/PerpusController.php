@@ -4,14 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\Perpus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PerpusController extends Controller
 {
+    // Constructor untuk menambahkan middleware auth
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index']); // Semua method kecuali index membutuhkan autentikasi
+    }
+
     // Menampilkan daftar buku
     public function index()
     {
+        // Ambil data perpustakaan yang diurutkan berdasarkan stok
         $perpuses = Perpus::orderBy('stok', 'ASC')->get();
+
+        // Tampilkan view daftar buku
         return view('perpus.index', compact('perpuses'));
+    }
+
+    public function show(Perpus $perpus)
+    {
+        return view('perpus.show', compact('perpus'));
     }
 
     // Menampilkan form untuk menambahkan buku baru
@@ -24,23 +39,26 @@ class PerpusController extends Controller
     public function store(Request $request)
     {
         // Validasi input
-        $request->validate([
-            'kode_barang' => 'required|unique:perpuses,kode_barang',
+        $validatedData = $request->validate([
+            'kode_barang' => 'required|unique:perpuses,kode_barang|max:100',
             'nama' => 'required|string|max:255',
-            'stok' => 'required|integer',
+            'stok' => 'required|integer|min:1',
         ]);
 
         // Menyimpan buku ke database
-        Perpus::create($request->all());
+        Perpus::create($validatedData);
 
         // Redirect dengan pesan sukses
-        return redirect()->route('perpus.index')->with('success', 'Data Berhasil Ditambahkan');
+        return redirect()->route('perpus.index')->with('success', 'Data buku berhasil ditambahkan.');
     }
 
     // Menampilkan form untuk mengedit buku
     public function edit($id)
     {
+        // Cari buku berdasarkan ID
         $perpus = Perpus::findOrFail($id);
+
+        // Tampilkan form edit
         return view('perpus.edit', compact('perpus'));
     }
 
@@ -48,32 +66,32 @@ class PerpusController extends Controller
     public function update(Request $request, $id)
     {
         // Validasi input
-        $request->validate([
-            'kode_barang' => 'required|unique:perpuses,kode_barang,' . $id,
+        $validatedData = $request->validate([
+            'kode_barang' => 'required|unique:perpuses,kode_barang,' . $id . '|max:100',
             'nama' => 'required|string|max:255',
-            'stok' => 'required|integer',
+            'stok' => 'required|integer|min:1',
         ]);
 
-        // Mencari buku
+        // Cari buku berdasarkan ID
         $perpus = Perpus::findOrFail($id);
 
-        // Memperbarui data buku
-        $perpus->update($request->all());
+        // Update buku dengan data baru
+        $perpus->update($validatedData);
 
         // Redirect dengan pesan sukses
-        return redirect()->route('perpus.index')->with('success', 'Barang berhasil diperbarui');
+        return redirect()->route('perpus.index')->with('success', 'Data buku berhasil diperbarui.');
     }
 
     // Menghapus buku
     public function delete($id)
     {
-        // Mencari buku
+        // Cari buku berdasarkan ID
         $perpus = Perpus::findOrFail($id);
 
-        // Menghapus buku
+        // Hapus buku
         $perpus->delete();
 
         // Redirect dengan pesan sukses
-        return redirect()->route('perpus.index')->with('success', 'Barang berhasil dihapus');
+        return redirect()->route('perpus.index')->with('success', 'Data buku berhasil dihapus.');
     }
 }

@@ -5,7 +5,7 @@
     <h2>Data Barang</h2>
     <a href="{{ route('perpus.create') }}" class="btn btn-primary">Tambah Barang</a>
     {{--<a href="{{ route('perpus.dashboard') }}" class="btn btn-primary">Home</a>--}}
-    {{--<a href="{{ route('singout') }}" class="btn btn-primary">Keluar</a>--}}
+    {{-- <a href="{{ route('logout') }}" class="btn btn-primary">Keluar</a> --}}
 
     <table class="table">
         <thead>
@@ -20,7 +20,11 @@
             @foreach ($perpuses as $perpus)
             <tr>
                 <td>{{ $perpus->kode_barang }}</td>
-                <td>{{ $perpus->nama }}</td>
+                <td>
+                <a href={{ route('perpus.show', $perpus->id) }}>
+                    {{ $perpus->nama }}
+                    </a>    
+                </td>
                 <td>{{ $perpus->stok }}</td>
                 <td>
                     <a href="{{ route('perpus.edit', $perpus->id) }}" class="btn btn-warning">Edit</a>
